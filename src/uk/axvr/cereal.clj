@@ -1,4 +1,4 @@
-(ns uk.axvr.cereal.core
+(ns uk.axvr.cereal
   (:import [purejavacomm CommPortIdentifier
                          SerialPort
                          SerialPortEventListener
@@ -140,3 +140,20 @@
   "De-register the listening fn for the specified port"
   [^Port port]
   (.removeEventListener ^SerialPort (.raw-port port)))
+
+
+;;; ------------------------------------------------------------
+;;; Utilities
+
+
+(defn get-port-names
+  "Gets a set of the currently avilable port names"
+  []
+  (set (map #(.getName ^CommPortIdentifier %) (port-identifiers))))
+
+(defn list-ports
+  "Print out the available ports.
+   The names printed may be passed to `serial.core/open` as printed."
+  []
+  (doseq [port (get-port-names)]
+    (println port)))
