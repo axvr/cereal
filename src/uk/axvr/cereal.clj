@@ -59,7 +59,7 @@
   (CommPortIdentifier/getPortIdentifier path))
 
 
-(defn close! 
+(defn close!
   "Closes an open port."
   [^Port port]
   (let [raw-port ^SerialPort (.raw-port port)]

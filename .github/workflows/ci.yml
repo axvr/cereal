@@ -1,0 +1,31 @@
+name: Cereal API CI
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: Run linter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup clj-kondo
+        uses: DeLaGuardo/setup-clj-kondo@afc83dbbf4e7e32e04649e29dbf30668d30e9e3e
+        with:
+          version: '2021.06.18'
+
+      - uses: actions/checkout@v2
+
+      - name: Run clj-kondo
+        run: clj-kondo --lint src
+
+  unit-test:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Clojure
+        uses: DeLaGuardo/setup-clojure@3.5
+        with:
+          cli: '1.10.3.882'
+
+      - uses: actions/checkout@v2
+
+      - name: Run tests
+        run: clojure -X:test
