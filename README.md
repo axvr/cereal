@@ -11,14 +11,14 @@ Add the following to your `deps.edn` dependency list:
 
 ```clojure
 uk.axvr.cereal {:git/url "https://github.com/axvr/cereal.git"
-                :sha "0f10b9d47809148351d82e8cb89a373fc99eb25d"}}
+                :sha     "0639daf4389a5934946ee1e19f2ab127c854815a"}}
 ```
 
 ## Usage
 
 ### Using the library
 
-Just make sure you pull in the `serial.core` namespace using something like:
+Require the `uk.axvr.cereal` namespace like so:
 
 ```clojure
 (require '[uk.axvr.cereal :as serial])
