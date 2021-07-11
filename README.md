@@ -1,5 +1,7 @@
 # Cereal
 
+***NOTE: this library is a work in progress and the API may change.***
+
 A simple library for serial port communication with Clojure. Although serial communciation may be considered old tech, it's useful for a communicating with a plethora of devices including exciting new hardware such as the [Monome](http://monome.org) and the [Arduino](http://arduino.cc).  It's powerd by [PureJavaComm](https://github.com/nyholku/purejavacomm) for serial communication
 
 
@@ -9,7 +11,7 @@ Add the following to your `deps.edn` dependency list:
 
 ```clojure
 uk.axvr.cereal {:git/url "https://github.com/axvr/cereal.git"
-                :sha ""}}
+                :sha "0f10b9d47809148351d82e8cb89a373fc99eb25d"}}
 ```
 
 ## Usage
@@ -18,22 +20,23 @@ uk.axvr.cereal {:git/url "https://github.com/axvr/cereal.git"
 
 Just make sure you pull in the `serial.core` namespace using something like:
 
-    (use 'serial.core)
+```clojure
+(require '[uk.axvr.cereal :as serial])
+```
 
 ### Finding your port identifier
 
-In order to connect to your serial device you need to know the path of the file it presents itself on. `serial.util` provides a simple function to list these paths out:
+In order to connect to your serial device you need to know the path of the file it presents itself on. `list-ports` will print these paths out:
 
-    => (use 'serial.util)
-
-    => (list-ports)
-
-    /dev/tty.usbmodemfa141
-    /dev/cu.usbmodemfa141
-    /dev/tty.Bluetooth-PDA-Sync
-    /dev/cu.Bluetooth-PDA-Sync
-    /dev/tty.Bluetooth-Modem
-    /dev/cu.Bluetooth-Modem
+```clojure
+(serial/list-ports)
+;; /dev/tty.usbmodemfa141
+;; /dev/cu.usbmodemfa141
+;; /dev/tty.Bluetooth-PDA-Sync
+;; /dev/cu.Bluetooth-PDA-Sync
+;; /dev/tty.Bluetooth-Modem
+;; /dev/cu.Bluetooth-Modem
+```
 
 In this case, we have an Arduino connected to `/dev/tty.usbmodemfa141`.
 
@@ -41,11 +44,15 @@ In this case, we have an Arduino connected to `/dev/tty.usbmodemfa141`.
 
 When you know the path to the serial port, connecting is just as simple as:
 
-    (open "/dev/tty.usbmodemfa141")
+```clojure
+(serial/open "/dev/tty.usbmodemfa141")
+```
 
 However, you'll want to bind the result so you can use it later:
 
-    (def port (open "/dev/tty.usbmodemfa141"))
+```clojure
+(def port (serial/open "/dev/tty.usbmodemfa141"))
+```
 
 ### Reading bytes
 
@@ -61,21 +68,29 @@ Finally, you may remove your listener by calling `unlisten!` and passing it the 
 
 The simplest way to write bytes is by passing a byte array to `write`:
 
-    (write port my-byte-array)
+```clojure
+(serial/write port my-byte-array)
+```
 
 This also works with any `Number`
 
-    (write port 20)
+```clojure
+(serial/write port 20)
+```
 
 As well as any `Sequential`
 
-    (write port [0xf0 0x79 0xf7])
+```clojure
+(serial/write port [0xf0 0x79 0xf7])
+```
 
 ### Closing the port
 
 Simply use the `close!` function:
 
-    (close! port)
+```clojure
+(serial/close! port)
+```
 
 ## Contributors
 
