@@ -8,35 +8,35 @@
 
 (defn- to-parity [parity]
   (case parity
-    :none  0
-    :odd   1
-    :even  2
-    :mark  3
-    :space 4))
+    :none  SerialPort/PARITY_NONE
+    :odd   SerialPort/PARITY_ODD
+    :even  SerialPort/PARITY_EVEN
+    :mark  SerialPort/PARITY_MARK
+    :space SerialPort/PARITY_SPACE))
 
 
 (defn- to-data-bits [data-bits]
   (case data-bits
-    5 5
-    6 6
-    7 7
-    8 8))
+    5 SerialPort/DATABITS_5
+    6 SerialPort/DATABITS_6
+    7 SerialPort/DATABITS_7
+    8 SerialPort/DATABITS_8))
 
 
 (defn- to-stop-bits [stop-bits]
   (case stop-bits
-    1   1
-    1.5 3
-    2   2))
+    1   SerialPort/STOPBITS_1
+    1.5 SerialPort/STOPBITS_1_5
+    2   SerialPort/STOPBITS_2))
 
 
 (defn- to-flow-control [flow-control]
   (case flow-control
-    :none         0
-    :rts-cts-in   1
-    :rts-cts-out  2
-    :xon-xoff-in  4
-    :xon-xoff-out 8))
+    :none         SerialPort/FLOWCONTROL_NONE
+    :rts-cts-in   SerialPort/FLOWCONTROL_RTSCTS_IN
+    :rts-cts-out  SerialPort/FLOWCONTROL_RTSCTS_OUT
+    :xon-xoff-in  SerialPort/FLOWCONTROL_XONXOFF_IN
+    :xon-xoff-out SerialPort/FLOWCONTROL_XONXOFF_OUT))
 
 
 (defrecord Port [path raw-port out-stream in-stream])
