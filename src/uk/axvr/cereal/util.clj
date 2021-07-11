@@ -1,4 +1,4 @@
-(ns serial.util
+(ns uk.axvr.cereal.util
   (:require [serial.core :refer [port-identifiers]])
   (:import [purejavacomm CommPortIdentifier]))
 

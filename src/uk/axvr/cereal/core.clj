@@ -1,10 +1,9 @@
-(ns serial.core
+(ns uk.axvr.cereal.core
   (:import [purejavacomm CommPortIdentifier
                          SerialPort
                          SerialPortEventListener
                          SerialPortEvent]
-           [java.io OutputStream
-                    InputStream]))
+           [java.io OutputStream InputStream]))
 
 (def  DATABITS_5  5)
 (def  DATABITS_6  6)

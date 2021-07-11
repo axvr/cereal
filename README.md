@@ -1,15 +1,16 @@
-# clj-serial
+# Cereal
 
-[![Build Status](https://travis-ci.org/peterschwarz/clj-serial.png?branch=master)](https://travis-ci.org/peterschwarz/clj-serial)
-
-A simple library for serial port communication with Clojure. Although serial communciation may be considered old tech, it's useful for a communicating with a plethora of devices including exciting new hardware such as the [Monome](http://monome.org) and the [Arduino](http://arduino.cc).  It's powerd by [PureJavaComm] (https://github.com/nyholku/purejavacomm) for serial communication
+A simple library for serial port communication with Clojure. Although serial communciation may be considered old tech, it's useful for a communicating with a plethora of devices including exciting new hardware such as the [Monome](http://monome.org) and the [Arduino](http://arduino.cc).  It's powerd by [PureJavaComm](https://github.com/nyholku/purejavacomm) for serial communication
 
 
 ## Installation
 
-Add the following to your `project.clj` dependencies:
+Add the following to your `deps.edn` dependency list:
 
-    [clj-serial "2.0.6-SNAPSHOT"]
+```clojure
+uk.axvr.cereal {:git/url "https://github.com/axvr/cereal.git"
+                :sha ""}}
+```
 
 ## Usage
 
@@ -48,7 +49,7 @@ However, you'll want to bind the result so you can use it later:
 
 ### Reading bytes
 
-If you wish to get raw access to the `InputStream` this is possible with the function `listen`. This allows you to specify a handler that will get called every time there is data available on the port and will pass your handler the `InputStream` to allow you to directly `.read` bytes from it.
+If you wish to get raw access to the `InputStream` this is possible with the function `listen!`. This allows you to specify a handler that will get called every time there is data available on the port and will pass your handler the `InputStream` to allow you to directly `.read` bytes from it.
 
 When the handler is first registered, the bytes that have been buffered on the serial port are dropped by default. This can be changed by passing false to `listen!` as an optional last argument.
 
@@ -78,13 +79,12 @@ Simply use the `close!` function:
 
 ## Contributors
 
-* Peter Schwarz
+* [peterschwarz/clj-serial](https://github.com/peterschwarz/clj-serial)
+  * Peter Schwarz
+* [samaaron/serial-port](https://github.com/samaaron/serial-port)
+  * Sam Aaron
+  * Jeff Rose
 
-Forked from [samaaron/serial-port](https://github.com/samaaron/serial-port), by
+## Legal
 
-* Sam Aaron
-* Jeff Rose
-
-## License
-
-Distributed under the Eclipse Public License, the same as Clojure.
+Distributed under the Eclipse Public License v1.0 (the same as Clojure).
