@@ -36,9 +36,6 @@
   []
   (enumeration-seq (raw-port-ids)))
 
-(def ^{:deprecated "2.0.3" :doc "Deprecated; use `port-identifiers`"}
-  port-ids port-identifiers)
-
 (defn port-identifier
   ^CommPortIdentifier [^String path]
   (CommPortIdentifier/getPortIdentifier path))
@@ -49,9 +46,6 @@
   (let [raw-port ^SerialPort (.raw-port port)]
     (.removeEventListener raw-port)
     (.close raw-port)))
-
-(def ^{:deprecated "2.0.3" :doc "Deprecated; use `close!` instead"}
-  close close!)
 
 (defn open
   "Returns an opened serial port. Allows you to specify the
@@ -142,13 +136,7 @@
        (.addEventListener raw-port listener)
        (.notifyOnDataAvailable raw-port true))))
 
-(def ^{:deprecated "2.0.3" :doc "Deprecated; use `listen!` instead"}
-  listen listen!)
-
 (defn unlisten!
   "De-register the listening fn for the specified port"
   [^Port port]
   (.removeEventListener ^SerialPort (.raw-port port)))
-
-(def ^{:deprecated "2.0.3" :doc "Deprecated; use `unlisten!` instead"}
-  remove-listener unlisten!)
