@@ -11,4 +11,5 @@
   "Print out the available ports.
    The names printed may be passed to `serial.core/open` as printed."
   []
-  (doall (map println (get-port-names))))
+  (doseq [port (get-port-names)]
+    (println port)))
