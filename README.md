@@ -1,8 +1,10 @@
 # Cereal
 
-***NOTE: this library is a work in progress and the API may change.***
+_**Note: this library is a work in progress and the API is likely to change.**_
 
-A simple library for serial port communication with Clojure. Although serial communciation may be considered old tech, it's useful for a communicating with a plethora of devices including exciting new hardware such as the [Monome](http://monome.org) and the [Arduino](http://arduino.cc).  It's powerd by [PureJavaComm](https://github.com/nyholku/purejavacomm) for serial communication
+A simple library for [serial port communication][serial] with Clojure.
+Although serial communciation may be considered old tech, it's useful for
+a communicating with a plethora of devices such as [Arduino][]s.
 
 
 ## Installation
@@ -10,13 +12,12 @@ A simple library for serial port communication with Clojure. Although serial com
 Add the following to your `deps.edn` dependency list:
 
 ```clojure
-uk.axvr.cereal {:git/url "https://github.com/axvr/cereal.git"
-                :sha     "0639daf4389a5934946ee1e19f2ab127c854815a"}}
+uk.axvr/cereal {:git/url "https://github.com/axvr/cereal.git"
+                :sha     "1539a96a4150fa4fa069cc66967a5f1d0e5903da"}}
 ```
 
-## Usage
 
-### Using the library
+## Usage
 
 Require the `uk.axvr.cereal` namespace like so:
 
@@ -24,9 +25,11 @@ Require the `uk.axvr.cereal` namespace like so:
 (require '[uk.axvr.cereal :as serial])
 ```
 
-### Finding your port identifier
 
-In order to connect to your serial device you need to know the path of the file it presents itself on. `list-ports` will print these paths out:
+### Finding the port identifier
+
+To connect to a serial device you need to know the identifier of the port the
+device is connected to.  The `list-ports` function may help you find it.
 
 ```clojure
 (serial/list-ports)
@@ -38,31 +41,40 @@ In order to connect to your serial device you need to know the path of the file 
 ;; /dev/cu.Bluetooth-Modem
 ```
 
-In this case, we have an Arduino connected to `/dev/tty.usbmodemfa141`.
+In this case, we have an Arduino connected at `/dev/tty.usbmodemfa141`.
 
-### Connecting with a port identifier
 
-When you know the path to the serial port, connecting is just as simple as:
+### Connecting to a port
 
-```clojure
-(serial/open "/dev/tty.usbmodemfa141")
-```
-
-However, you'll want to bind the result so you can use it later:
+When you know the identifier of the serial port, use the `open` function to
+open a connection to it.
 
 ```clojure
 (def port (serial/open "/dev/tty.usbmodemfa141"))
 ```
 
+
 ### Reading bytes
 
-If you wish to get raw access to the `InputStream` this is possible with the function `listen!`. This allows you to specify a handler that will get called every time there is data available on the port and will pass your handler the `InputStream` to allow you to directly `.read` bytes from it.
+<!-- TODO: rewrite this section. -->
 
-When the handler is first registered, the bytes that have been buffered on the serial port are dropped by default. This can be changed by passing false to `listen!` as an optional last argument.
+If you wish to get raw access to the `InputStream` this is possible with the
+function `listen!`. This allows you to specify a handler that will get called
+every time there is data available on the port and will pass your handler the
+`InputStream` to allow you to directly `.read` bytes from it.
 
-Only one listener may be registered at a time. If you want to fork the incoming datastream to a series of streams, you might want to consider using lamina. You can then register a handler which simply enqueues the incoming serial data to a lamina channel which you may then fork and map according to your whim.
+When the handler is first registered, the bytes that have been buffered on the
+serial port are dropped by default. This can be changed by passing false to
+`listen!` as an optional last argument.
 
-Finally, you may remove your listener by calling `unlisten!` and passing it the port binding.
+Only one listener may be registered at a time. If you want to fork the incoming
+datastream to a series of streams, you might want to consider using lamina. You
+can then register a handler which simply enqueues the incoming serial data to
+a lamina channel which you may then fork and map according to your whim.
+
+Finally, you may remove your listener by calling `unlisten!` and passing it the
+port binding.
+
 
 ### Writing bytes
 
@@ -84,22 +96,29 @@ As well as any `Sequential`
 (serial/write port [0xf0 0x79 0xf7])
 ```
 
+
 ### Closing the port
 
-Simply use the `close!` function:
+Be sure to close your connection to the serial port once you are done using it.
 
 ```clojure
 (serial/close! port)
 ```
 
-## Contributors
-
-* [peterschwarz/clj-serial](https://github.com/peterschwarz/clj-serial)
-  * Peter Schwarz
-* [samaaron/serial-port](https://github.com/samaaron/serial-port)
-  * Sam Aaron
-  * Jeff Rose
 
 ## Legal
 
+- Copyright © 2021, Alex Vear.
+- Copyright © 2014—2018, Peter Schwarz.
+- Copyright © 2011–2012, Sam Aaron.
+
 Distributed under the Eclipse Public License v1.0 (the same as Clojure).
+
+Cereal is a fork of Peter Schwarz's [clj-serial][peterschwarz/clj-serial] which
+in turn was a fork of Sam Aaron's [serial-port][samaaron/serial-port].
+
+
+[peterschwarz/clj-serial]: https://github.com/peterschwarz/clj-serial
+[samaaron/serial-port]: https://github.com/samaaron/serial-port
+[serial]: https://en.wikipedia.org/wiki/Serial_communication
+[Arduino]: https://www.arduino.cc
