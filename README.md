@@ -13,7 +13,7 @@ Add the following to your `deps.edn` dependency list:
 
 ```clojure
 uk.axvr/cereal {:git/url "https://github.com/axvr/cereal.git"
-                :sha     "1539a96a4150fa4fa069cc66967a5f1d0e5903da"}}
+                :git/sha "8a0c4fea050fbb10099ffbeac1423b492ae4c678"}}
 ```
 
 
@@ -109,7 +109,7 @@ Be sure to close your connection to the serial port once you are done using it.
 ## Legal
 
 - Copyright © 2021, Alex Vear.
-- Copyright © 2014—2018, Peter Schwarz.
+- Copyright © 2014–2018, Peter Schwarz.
 - Copyright © 2011–2012, Sam Aaron.
 
 Distributed under the Eclipse Public License v1.0 (the same as Clojure).
