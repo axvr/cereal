@@ -3,7 +3,9 @@
                          SerialPort
                          SerialPortEventListener
                          SerialPortEvent]
-           [java.io OutputStream InputStream]))
+           [java.io Closeable
+                    OutputStream
+                    InputStream]))
 
 
 (defn- to-parity [parity]
@@ -39,7 +41,11 @@
     :xon-xoff-out SerialPort/FLOWCONTROL_XONXOFF_OUT))
 
 
-(defrecord Port [path raw-port out-stream in-stream])
+(defrecord Port [path raw-port out-stream in-stream]
+  Closeable
+  (close [_] (doto ^SerialPort raw-port
+                  (.removeEventListener)
+                  (.close))))
 
 
 (defn- raw-port-ids
@@ -62,9 +68,7 @@
 (defn close!
   "Closes an open port."
   [^Port port]
-  (let [raw-port ^SerialPort (.raw-port port)]
-    (.removeEventListener raw-port)
-    (.close raw-port)))
+  (.close port))
 
 
 (defn open
