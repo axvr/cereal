@@ -78,22 +78,22 @@ port binding.
 
 ### Writing bytes
 
-The simplest way to write bytes is by passing a byte array to `write`:
+The simplest way to write bytes is by passing a byte array to `write!`:
 
 ```clojure
-(serial/write port my-byte-array)
+(serial/write! port my-byte-array)
 ```
 
 This also works with any `Number`
 
 ```clojure
-(serial/write port 20)
+(serial/write! port 20)
 ```
 
 As well as any `Sequential`
 
 ```clojure
-(serial/write port [0xf0 0x79 0xf7])
+(serial/write! port [0xf0 0x79 0xf7])
 ```
 
 

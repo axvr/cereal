@@ -156,7 +156,7 @@
     (.flush ^OutputStream out)))
 
 
-(defn write
+(defn write!
   "Writes the given data to the port and returns it. All number literals are treated as bytes.
   By extending the protocol Bytable, any arbitray values can be sent to the output stream.
   For example:
@@ -169,7 +169,7 @@
   port)
 
 
-(defn skip-input!
+(defn- skip-input!
   "Skips a specified amount of buffered input data."
   ([^Port port] (skip-input! port (.available ^InputStream (.in-stream port))))
   ([^Port port ^long to-drop]
@@ -205,10 +205,12 @@
 ;;; Utilities
 
 
-(defn get-port-names
+(defn- get-port-names
   "Gets a set of the currently avilable port names"
   []
-  (set (map #(.getName ^CommPortIdentifier %) (port-identifiers))))
+  (->> (port-identifiers)
+       (map #(.getName ^CommPortIdentifier %))
+       set))
 
 
 (defn list-ports
