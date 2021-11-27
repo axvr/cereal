@@ -41,7 +41,7 @@
     :xon-xoff-out SerialPort/FLOWCONTROL_XONXOFF_OUT))
 
 
-(defrecord Port [path raw-port out-stream in-stream]
+(defrecord Port [port-id raw-port out-stream in-stream]
   Closeable
   (close [_] (doto ^SerialPort raw-port
                   (.removeEventListener)
@@ -61,8 +61,8 @@
 
 
 (defn port-identifier
-  ^CommPortIdentifier [^String path]
-  (CommPortIdentifier/getPortIdentifier path))
+  ^CommPortIdentifier [^String port-id]
+  (CommPortIdentifier/getPortIdentifier port-id))
 
 
 (defn close!
@@ -108,7 +108,7 @@
     (open \"/dev/ttyUSB0\")
     (open \"/dev/ttyUSB0\" :baud-rate 9600, :parity :none, :data-bits 8)"
 
-  [path & {:keys [baud-rate data-bits stop-bits parity flow-control timeout]
+  [port-id & {:keys [baud-rate data-bits stop-bits parity flow-control timeout]
            :or {baud-rate    115200
                 data-bits    8
                 stop-bits    1
@@ -117,21 +117,21 @@
                 timeout      2000}}]
   (try
     (let [uuid     (.toString (java.util.UUID/randomUUID))
-          port-id  (port-identifier path)
-          raw-port ^SerialPort (.open port-id uuid timeout)
-          out      (.getOutputStream raw-port)
-          in       (.getInputStream  raw-port)]
+          port-id  (port-identifier port-id)
+          raw-port ^SerialPort   (.open port-id uuid timeout)
+          out      ^OutputStream (.getOutputStream raw-port)
+          in       ^InputStream  (.getInputStream  raw-port)]
       (assert (not (nil? port-id))
-              (str "Port specified by path " path " is not available"))
+              (str "Port specified by port-id " port-id " is not available"))
       (doto raw-port
         (.setSerialPortParams baud-rate
                               (to-data-bits data-bits)
                               (to-stop-bits stop-bits)
                               (to-parity parity))
         (.setFlowControlMode (to-flow-control flow-control)))
-      (Port. path raw-port out in))
+      (Port. port-id raw-port out in))
     (catch Exception e
-      (throw (Exception. (str "Sorry, couldn't connect to the port with path " path) e)))))
+      (throw (Exception. (str "Sorry, couldn't connect to the port with port-id " port-id) e)))))
 
 
 (defprotocol Bytable
@@ -145,7 +145,7 @@
   (to-bytes [this] (byte-array 1 (.byteValue this)))
 
   clojure.lang.Sequential
-  (to-bytes [this] (byte-array (count this)(map #(.byteValue ^Number %) this))))
+  (to-bytes [this] (byte-array (count this) (map #(.byteValue ^Number %) this))))
 
 
 (defn- write-bytes
