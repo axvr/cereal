@@ -151,7 +151,7 @@
 (defn- write-bytes
   "Writes a byte array to a port"
   [^Port port bytes]
-  (let [out (.out-stream port)]
+  (let [out (:out-stream port)]
     (.write ^OutputStream out ^bytes bytes)
     (.flush ^OutputStream out)))
 
@@ -171,9 +171,9 @@
 
 (defn- skip-input!
   "Skips a specified amount of buffered input data."
-  ([^Port port] (skip-input! port (.available ^InputStream (.in-stream port))))
+  ([^Port port] (skip-input! port (.available ^InputStream (:in-stream port))))
   ([^Port port ^long to-drop]
-   (.skip ^InputStream (.in-stream port) to-drop)))
+   (.skip ^InputStream (:in-stream port) to-drop)))
 
 
 (defn listen!
@@ -182,8 +182,8 @@
   Only one listener is allowed at a time."
   ([^Port port handler] (listen! port handler true))
   ([^Port port handler skip-buffered?]
-   (let [raw-port  ^SerialPort (.raw-port port)
-         in-stream ^InputStream (.in-stream port)
+   (let [raw-port  ^SerialPort (:raw-port port)
+         in-stream ^InputStream (:in-stream port)
          listener  (reify SerialPortEventListener
                      (serialEvent [_ event]
                        (when (= SerialPortEvent/DATA_AVAILABLE
@@ -198,7 +198,7 @@
 (defn unlisten!
   "De-register the listening fn for the specified port"
   [^Port port]
-  (.removeEventListener ^SerialPort (.raw-port port)))
+  (.removeEventListener ^SerialPort (:raw-port port)))
 
 
 ;;; ------------------------------------------------------------
