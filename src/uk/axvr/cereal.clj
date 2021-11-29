@@ -8,7 +8,7 @@
                     InputStream]))
 
 
-(defn- to-parity [parity]
+(defn- ->parity [parity]
   (case parity
     :none  SerialPort/PARITY_NONE
     :odd   SerialPort/PARITY_ODD
@@ -17,7 +17,7 @@
     :space SerialPort/PARITY_SPACE))
 
 
-(defn- to-data-bits [data-bits]
+(defn- ->data-bits [data-bits]
   (case data-bits
     5 SerialPort/DATABITS_5
     6 SerialPort/DATABITS_6
@@ -25,14 +25,14 @@
     8 SerialPort/DATABITS_8))
 
 
-(defn- to-stop-bits [stop-bits]
+(defn- ->stop-bits [stop-bits]
   (case stop-bits
     1   SerialPort/STOPBITS_1
     1.5 SerialPort/STOPBITS_1_5
     2   SerialPort/STOPBITS_2))
 
 
-(defn- to-flow-control [flow-control]
+(defn- ->flow-control [flow-control]
   (case flow-control
     :none         SerialPort/FLOWCONTROL_NONE
     :rts-cts-in   SerialPort/FLOWCONTROL_RTSCTS_IN
@@ -43,25 +43,13 @@
 
 (defrecord Port [port-id raw-port out-stream in-stream]
   Closeable
-  (close [_] (doto ^SerialPort raw-port
-                  (.removeEventListener)
-                  (.close))))
+  (close [_]
+    (doto ^SerialPort raw-port
+      (.removeEventListener)
+      (.close))))
 
 
-(defn- raw-port-ids
-  "Returns the raw java Enumeration of port identifiers"
-  []
-  (CommPortIdentifier/getPortIdentifiers))
-
-
-(defn port-identifiers
-  "Returns a seq representing all port identifiers visible to the system"
-  []
-  (enumeration-seq (raw-port-ids)))
-
-
-(defn port-identifier
-  ^CommPortIdentifier [^String port-id]
+(defn- port-identifier ^CommPortIdentifier [^String port-id]
   (CommPortIdentifier/getPortIdentifier port-id))
 
 
@@ -72,7 +60,7 @@
 
 
 (defn open
-  "Returns an opened serial port.  Allows you to specify the
+  "Returns an opened serial port.  Can specify:
 
     :baud-rate  (default 115200)
 
@@ -107,7 +95,6 @@
 
     (open \"/dev/ttyUSB0\")
     (open \"/dev/ttyUSB0\" :baud-rate 9600, :parity :none, :data-bits 8)"
-
   [port-id & {:keys [baud-rate data-bits stop-bits parity flow-control timeout]
            :or {baud-rate    115200
                 data-bits    8
@@ -125,10 +112,10 @@
               (str "Port specified by port-id " port-id " is not available"))
       (doto raw-port
         (.setSerialPortParams baud-rate
-                              (to-data-bits data-bits)
-                              (to-stop-bits stop-bits)
-                              (to-parity parity))
-        (.setFlowControlMode (to-flow-control flow-control)))
+                              (->data-bits data-bits)
+                              (->stop-bits stop-bits)
+                              (->parity parity))
+        (.setFlowControlMode (->flow-control flow-control)))
       (Port. port-id raw-port out in))
     (catch Exception e
       (throw (Exception. (str "Sorry, couldn't connect to the port with port-id " port-id) e)))))
@@ -205,8 +192,15 @@
 ;;; Utilities
 
 
-(defn- get-port-names
-  "Gets a set of the currently avilable port names"
+(defn- port-identifiers
+  "Returns a seq representing all port identifiers visible to the system."
+  []
+  (enumeration-seq
+    (CommPortIdentifier/getPortIdentifiers)))
+
+
+(defn get-ports
+  "Returns a hash-set of avilable port IDs."
   []
   (->> (port-identifiers)
        (map #(.getName ^CommPortIdentifier %))
@@ -214,8 +208,7 @@
 
 
 (defn list-ports
-  "Print out the available ports.
-  The names printed may be passed to `uk.axvr.cereal/open` as printed."
+  "Print the IDs of available ports."
   []
-  (doseq [port (get-port-names)]
+  (doseq [port (get-ports)]
     (println port)))
