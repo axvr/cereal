@@ -4,5 +4,5 @@
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {io.github.cognitect-labs/test-runner
                                {:git/url "https://github.com/cognitect-labs/test-runner.git"
-                                :git/sha "4e7e1c0dfd5291fa2134df052443dc29695d8cbe"}}
+                                :git/sha "dd6da11611eeb87f08780a30ac8ea6012d4c05ce"}}
                   :exec-fn cognitect.test-runner.api/test}}}
