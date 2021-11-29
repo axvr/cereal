@@ -65,37 +65,39 @@
     :baud-rate  (default 115200)
 
     :stop-bits
-      * 1      (default)
-      * 1.5
-      * 2
+      1      (default)
+      1.5
+      2
 
     :data-bits
-      * 5
-      * 6
-      * 7
-      * 8      (default)
+      5
+      6
+      7
+      8      (default)
 
     :parity
-      * :none  (default)
-      * :odd
-      * :even
-      * :mark
-      * :space
+      :none  (default)
+      :odd
+      :even
+      :mark
+      :space
 
     :flow-control
-      * :none  (default)
-      * :rts-cts-in
-      * :rts-cts-out
-      * :xon-xoff-in
-      * :xon-xoff-out
+      :none  (default)
+      :rts-cts-in
+      :rts-cts-out
+      :xon-xoff-in
+      :xon-xoff-out
 
-    :timeout in milliseconds  (default 2000)
+    :timeout  - in milliseconds (default 2000)
+
+    :owner    - current owner of the port (defaults to random UUID)
 
   These options can be set like so:
 
     (open \"/dev/ttyUSB0\")
     (open \"/dev/ttyUSB0\" :baud-rate 9600, :parity :none, :data-bits 8)"
-  [port-id & {:keys [baud-rate data-bits stop-bits parity flow-control timeout]
+  [port-id & {:keys [baud-rate data-bits stop-bits parity flow-control timeout owner]
            :or {baud-rate    115200
                 data-bits    8
                 stop-bits    1
@@ -103,9 +105,9 @@
                 flow-control :none
                 timeout      2000}}]
   (try
-    (let [uuid     (.toString (java.util.UUID/randomUUID))
+    (let [owner    (or owner (str (java.util.UUID/randomUUID)))
           port-id  (port-identifier port-id)
-          raw-port ^SerialPort   (.open port-id uuid timeout)
+          raw-port ^SerialPort   (.open port-id owner timeout)
           out      ^OutputStream (.getOutputStream raw-port)
           in       ^InputStream  (.getInputStream  raw-port)]
       (assert (not (nil? port-id))
