@@ -104,23 +104,18 @@
                 parity       :none
                 flow-control :none
                 timeout      2000}}]
-  (try
-    (let [owner    (or owner (str (java.util.UUID/randomUUID)))
-          port-id  (port-identifier port-id)
-          raw-port ^SerialPort   (.open port-id owner timeout)
-          out      ^OutputStream (.getOutputStream raw-port)
-          in       ^InputStream  (.getInputStream  raw-port)]
-      (assert (not (nil? port-id))
-              (str "Port specified by port-id " port-id " is not available"))
-      (doto raw-port
-        (.setSerialPortParams baud-rate
-                              (->data-bits data-bits)
-                              (->stop-bits stop-bits)
-                              (->parity parity))
-        (.setFlowControlMode (->flow-control flow-control)))
-      (Port. port-id raw-port out in))
-    (catch Exception e
-      (throw (Exception. (str "Sorry, couldn't connect to the port with port-id " port-id) e)))))
+  (let [owner    (or owner (str (java.util.UUID/randomUUID)))
+        port-id  (port-identifier port-id)
+        raw-port ^SerialPort   (.open port-id owner timeout)
+        out      ^OutputStream (.getOutputStream raw-port)
+        in       ^InputStream  (.getInputStream  raw-port)]
+    (doto raw-port
+      (.setSerialPortParams baud-rate
+                            (->data-bits data-bits)
+                            (->stop-bits stop-bits)
+                            (->parity parity))
+      (.setFlowControlMode (->flow-control flow-control)))
+    (Port. port-id raw-port out in)))
 
 
 (defprotocol Bytable
