@@ -96,14 +96,21 @@
   These options can be set like so:
 
     (open \"/dev/ttyUSB0\")
+
     (open \"/dev/ttyUSB0\" :baud-rate 9600, :parity :none, :data-bits 8)"
-  [port-id & {:keys [baud-rate data-bits stop-bits parity flow-control timeout owner]
-           :or {baud-rate    115200
-                data-bits    8
-                stop-bits    1
-                parity       :none
-                flow-control :none
-                timeout      2000}}]
+  [port-id & {:keys [baud-rate
+                     data-bits
+                     stop-bits
+                     parity
+                     flow-control
+                     timeout
+                     owner]
+              :or {baud-rate    115200
+                   data-bits    8
+                   stop-bits    1
+                   parity       :none
+                   flow-control :none
+                   timeout      2000}}]
   (let [owner    (or owner (str (java.util.UUID/randomUUID)))
         port-id  (port-identifier port-id)
         raw-port ^SerialPort   (.open port-id owner timeout)
@@ -164,7 +171,8 @@
   "Register a function to be called for every byte received on the specified port.
 
   Only one listener is allowed at a time."
-  ([^Port port handler] (listen! port handler true))
+  ([^Port port handler]
+   (listen! port handler true))
   ([^Port port handler skip-buffered?]
    (let [raw-port  ^SerialPort (:raw-port port)
          in-stream ^InputStream (:in-stream port)
