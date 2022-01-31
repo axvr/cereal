@@ -3,9 +3,65 @@
                          SerialPort
                          SerialPortEventListener
                          SerialPortEvent]
-           [java.io Closeable
-                    OutputStream
-                    InputStream]))
+           [java.io Closeable OutputStream InputStream]
+           [java.util UUID]))
+
+
+(defprotocol Bytable
+  (to-bytes [this] "Converts the type to bytes"))
+
+(extend-protocol Bytable
+  (class (byte-array 0))
+  (to-bytes [this] this)
+
+  Number
+  (to-bytes [this]
+    (byte-array 1 (.byteValue this)))
+
+  clojure.lang.Sequential
+  (to-bytes [this]
+    (byte-array (count this) (map to-bytes this))))
+
+
+(defrecord Port [port-id raw-port out-stream in-stream]
+  Closeable
+  (close [_]
+    (doto ^SerialPort raw-port
+      (.removeEventListener)
+      (.close))))
+
+
+(defn send!
+  "Sends the given data to the port and returns it. All number literals are
+  treated as bytes.
+
+  By extending the protocol Bytable, any arbitry values can be sent to the
+  output stream.  For example:
+
+      (extend-protocol Bytable
+        String
+        (to-bytes [this] (.getBytes this \"ASCII\")))"
+  [port & data]
+  (let [^OutputStream out (:out-stream port)]
+    (doseq [x data]
+      (.write out ^bytes (to-bytes x))
+      (.flush out))
+    port))
+
+
+(defn- listen!
+  "Register a function to be called for every byte received on the specified port."
+  [^Port port handler]
+  (let [raw-port  ^SerialPort  (:raw-port port)
+        in-stream ^InputStream (:in-stream port)
+        listener  (reify SerialPortEventListener
+                    (serialEvent [_ event]
+                      (when (= SerialPortEvent/DATA_AVAILABLE
+                               (.getEventType event))
+                        (handler (.read in-stream)))))]
+    (doto raw-port
+      (.addEventListener listener)
+      (.notifyOnDataAvailable true))))
 
 
 (defn- ->parity [parity]
@@ -39,93 +95,6 @@
     :rts-cts-out  SerialPort/FLOWCONTROL_RTSCTS_OUT
     :xon-xoff-in  SerialPort/FLOWCONTROL_XONXOFF_IN
     :xon-xoff-out SerialPort/FLOWCONTROL_XONXOFF_OUT))
-
-
-(defrecord Port [port-id raw-port out-stream in-stream]
-  Closeable
-  (close [_]
-    (doto ^SerialPort raw-port
-      (.removeEventListener)
-      (.close))))
-
-
-(defn- port-identifier ^CommPortIdentifier [^String port-id]
-  (CommPortIdentifier/getPortIdentifier port-id))
-
-
-(defn close!
-  "Closes an open port."
-  [^Port port]
-  (.close port))
-
-
-(defprotocol Bytable
-  (to-bytes [this] "Converts the type to bytes"))
-
-(extend-protocol Bytable
-  (class (byte-array 0))
-  (to-bytes [this] this)
-
-  Number
-  (to-bytes [this] (byte-array 1 (.byteValue this)))
-
-  clojure.lang.Sequential
-  (to-bytes [this] (byte-array (count this) (map #(.byteValue ^Number %) this))))
-
-
-(defn- write-bytes
-  "Writes a byte array to a port"
-  [^Port port bytes]
-  (let [out (:out-stream port)]
-    (.write ^OutputStream out ^bytes bytes)
-    (.flush ^OutputStream out)))
-
-
-(defn write!
-  "Writes the given data to the port and returns it. All number literals are treated as bytes.
-  By extending the protocol Bytable, any arbitray values can be sent to the output stream.
-  For example:
-    (extend-protocol Bytable
-      String
-      (to-bytes [this] (.getBytes this \"ASCII\")))"
-  [port & data]
-  (doseq [x data]
-    (write-bytes port (to-bytes x)))
-  port)
-
-
-(defn- skip-input!
-  "Skips a specified amount of buffered input data."
-  ([^Port port]
-   (skip-input! port (.available ^InputStream (:in-stream port))))
-  ([^Port port ^long to-drop]
-   (.skip ^InputStream (:in-stream port) to-drop)))
-
-
-(defn listen!
-  "Register a function to be called for every byte received on the specified port.
-
-  Only one listener is allowed at a time."
-  ([^Port port handler]
-   (listen! port handler true))
-  ([^Port port handler skip-buffered?]
-   (let [raw-port  ^SerialPort (:raw-port port)
-         in-stream ^InputStream (:in-stream port)
-         listener  (reify SerialPortEventListener
-                     (serialEvent [_ event]
-                       (when (= SerialPortEvent/DATA_AVAILABLE
-                                (.getEventType event))
-                         (handler in-stream))))]
-     (when skip-buffered?
-       (skip-input! port))
-     (.addEventListener raw-port listener)
-     (.notifyOnDataAvailable raw-port true))))
-
-
-(defn unlisten!
-  "De-register the listening fn for the specified port"
-  [^Port port]
-  (.removeEventListener ^SerialPort (:raw-port port)))
 
 
 (defn open
@@ -166,9 +135,9 @@
 
   These options can be set like so:
 
-    (open \"/dev/ttyUSB0\")
+      (open \"/dev/ttyUSB0\")
 
-    (open \"/dev/ttyUSB0\" :baud-rate 9600, :parity :none, :data-bits 8)"
+      (open \"/dev/ttyUSB0\" :baud-rate 9600, :parity :none, :data-bits 8)"
   [port-id & {:keys [baud-rate
                      data-bits
                      stop-bits
@@ -183,8 +152,8 @@
                    parity       :none
                    flow-control :none
                    timeout      2000}}]
-  (let [owner    (or owner (str (java.util.UUID/randomUUID)))
-        port-id  (port-identifier port-id)
+  (let [owner    (or owner (str (UUID/randomUUID)))
+        port-id  (CommPortIdentifier/getPortIdentifier port-id)
         raw-port ^SerialPort   (.open port-id owner timeout)
         out      ^OutputStream (.getOutputStream raw-port)
         in       ^InputStream  (.getInputStream  raw-port)]
