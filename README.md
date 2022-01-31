@@ -1,5 +1,11 @@
 # Cereal
 
+**Unmaintained**: this library is no longer maintained because both Java and
+the library this wrapped had limitations which prevented me from building what
+I wanted it for.  If you would like to maintain it, please send me an email.
+
+---
+
 _**Note: this library is a work in progress and the API is likely to change.**_
 
 A simple library for [serial port communication][serial] with Clojure.

@@ -1,0 +1,12 @@
+- Nicer general interface.
+  - Remove listen! function.  Replace with callback arg in open.
+  - Remove close! function?
+  - Replace write! with send!?
+- Detect if port is already open/in-use and error.
+  - https://github.com/nyholku/purejavacomm/issues/54
+  - May be able to implement a work around by directly making ioctl requests to
+    the Linux kernel?
+- Better docs, examples and rewrite README.
+  - Mention/change docs to use `with-open`
+  - Mention Linux user permissions in README.
+- Write more tests.
