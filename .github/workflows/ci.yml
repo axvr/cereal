@@ -9,7 +9,7 @@ jobs:
       - name: Setup clj-kondo
         uses: DeLaGuardo/setup-clj-kondo@afc83dbbf4e7e32e04649e29dbf30668d30e9e3e
         with:
-          version: '2021.10.19'
+          version: '2022.01.15'
 
       - uses: actions/checkout@v2
 
@@ -21,9 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Clojure
-        uses: DeLaGuardo/setup-clojure@3.5
+        uses: DeLaGuardo/setup-clojure@3.7
         with:
-          cli: '1.10.3.1029'
+          cli: '1.10.3.1069'
 
       - uses: actions/checkout@v2
 
