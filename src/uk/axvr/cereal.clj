@@ -51,15 +51,13 @@
 
 (defn- listen!
   "Register a function to be called for every byte received on the specified port."
-  [^Port port handler]
-  (let [raw-port  ^SerialPort  (:raw-port port)
-        in-stream ^InputStream (:in-stream port)
-        listener  (reify SerialPortEventListener
-                    (serialEvent [_ event]
-                      (when (= SerialPortEvent/DATA_AVAILABLE
-                               (.getEventType event))
-                        (handler (.read in-stream)))))]
-    (doto raw-port
+  [^SerialPort port ^InputStream in-stream handler]
+  (let [listener (reify SerialPortEventListener
+                   (serialEvent [_ event]
+                     (when (= SerialPortEvent/DATA_AVAILABLE
+                              (.getEventType event))
+                       (handler in-stream))))]
+    (doto port
       (.addEventListener listener)
       (.notifyOnDataAvailable true))))
 
@@ -157,16 +155,15 @@
         raw-port ^SerialPort   (.open port-id owner timeout)
         out      ^OutputStream (.getOutputStream raw-port)
         in       ^InputStream  (.getInputStream  raw-port)]
+    (when listen
+      (listen! raw-port in listen))
     (doto raw-port
       (.setSerialPortParams baud-rate
                             (->data-bits data-bits)
                             (->stop-bits stop-bits)
                             (->parity parity))
       (.setFlowControlMode (->flow-control flow-control)))
-    (let [port (Port. port-id raw-port out in)]
-      (when listen
-        (listen! port listen))
-      port)))
+    (Port. port-id raw-port out in)))
 
 
 ;;; ------------------------------------------------------------
