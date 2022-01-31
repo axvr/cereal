@@ -59,72 +59,6 @@
   (.close port))
 
 
-(defn open
-  "Returns an opened serial port.  Can specify:
-
-    :baud-rate  (default 115200)
-
-    :stop-bits
-      1      (default)
-      1.5
-      2
-
-    :data-bits
-      5
-      6
-      7
-      8      (default)
-
-    :parity
-      :none  (default)
-      :odd
-      :even
-      :mark
-      :space
-
-    :flow-control
-      :none  (default)
-      :rts-cts-in
-      :rts-cts-out
-      :xon-xoff-in
-      :xon-xoff-out
-
-    :timeout  - in milliseconds (default 2000)
-
-    :owner    - current owner of the port (defaults to random UUID)
-
-  These options can be set like so:
-
-    (open \"/dev/ttyUSB0\")
-
-    (open \"/dev/ttyUSB0\" :baud-rate 9600, :parity :none, :data-bits 8)"
-  [port-id & {:keys [baud-rate
-                     data-bits
-                     stop-bits
-                     parity
-                     flow-control
-                     timeout
-                     owner]
-              :or {baud-rate    115200
-                   data-bits    8
-                   stop-bits    1
-                   parity       :none
-                   flow-control :none
-                   timeout      2000}}]
-  (let [owner    (or owner (str (java.util.UUID/randomUUID)))
-        port-id  (port-identifier port-id)
-        raw-port ^SerialPort   (.open port-id owner timeout)
-        out      ^OutputStream (.getOutputStream raw-port)
-        in       ^InputStream  (.getInputStream  raw-port)]
-    (doto raw-port
-      (.setSerialPortParams baud-rate
-                            (->data-bits data-bits)
-                            (->stop-bits stop-bits)
-                            (->parity parity))
-      (.setFlowControlMode (->flow-control flow-control)))
-    (Port. port-id raw-port out in)))
-
-
 (defprotocol Bytable
   (to-bytes [this] "Converts the type to bytes"))
 
@@ -162,7 +96,8 @@
 
 (defn- skip-input!
   "Skips a specified amount of buffered input data."
-  ([^Port port] (skip-input! port (.available ^InputStream (:in-stream port))))
+  ([^Port port]
+   (skip-input! port (.available ^InputStream (:in-stream port))))
   ([^Port port ^long to-drop]
    (.skip ^InputStream (:in-stream port) to-drop)))
 
@@ -191,6 +126,78 @@
   "De-register the listening fn for the specified port"
   [^Port port]
   (.removeEventListener ^SerialPort (:raw-port port)))
+
+
+(defn open
+  "Returns an opened serial port.  Can specify:
+
+    :baud-rate  (default 115200)
+
+    :stop-bits
+      1      (default)
+      1.5
+      2
+
+    :data-bits
+      5
+      6
+      7
+      8      (default)
+
+    :parity
+      :none  (default)
+      :odd
+      :even
+      :mark
+      :space
+
+    :flow-control
+      :none  (default)
+      :rts-cts-in
+      :rts-cts-out
+      :xon-xoff-in
+      :xon-xoff-out
+
+    :timeout  - in milliseconds (default 2000)
+
+    :owner    - current owner of the port (defaults to random UUID)
+
+    :listen   - a callback function invoked upon data received.
+
+  These options can be set like so:
+
+    (open \"/dev/ttyUSB0\")
+
+    (open \"/dev/ttyUSB0\" :baud-rate 9600, :parity :none, :data-bits 8)"
+  [port-id & {:keys [baud-rate
+                     data-bits
+                     stop-bits
+                     parity
+                     flow-control
+                     timeout
+                     owner
+                     listen]
+              :or {baud-rate    115200
+                   data-bits    8
+                   stop-bits    1
+                   parity       :none
+                   flow-control :none
+                   timeout      2000}}]
+  (let [owner    (or owner (str (java.util.UUID/randomUUID)))
+        port-id  (port-identifier port-id)
+        raw-port ^SerialPort   (.open port-id owner timeout)
+        out      ^OutputStream (.getOutputStream raw-port)
+        in       ^InputStream  (.getInputStream  raw-port)]
+    (doto raw-port
+      (.setSerialPortParams baud-rate
+                            (->data-bits data-bits)
+                            (->stop-bits stop-bits)
+                            (->parity parity))
+      (.setFlowControlMode (->flow-control flow-control)))
+    (let [port (Port. port-id raw-port out in)]
+      (when listen
+        (listen! port listen))
+      port)))
 
 
 ;;; ------------------------------------------------------------
